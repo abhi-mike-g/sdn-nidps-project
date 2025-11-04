@@ -176,6 +176,9 @@ GNU GPL v3.0 License – See `LICENSE` file.
 ## Author
 
 **SDN-NIDPS Development Team**
-***Abhidutta Mukund Giri***
-***Avishi Bansal***
-***Piyush***
+
+**Abhidutta Mukund Giri**
+
+**Avishi Bansal**
+
+**Piyush**
