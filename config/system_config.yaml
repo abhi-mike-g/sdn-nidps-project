@@ -1,0 +1,50 @@
+# SDN-NIDPS System Configuration
+
+system:
+  name: "SDN-NIDPS"
+  version: "1.0"
+  environment: "demo"
+
+ryu_controller:
+  host: "0.0.0.0"
+  port: 6653
+  wsapi_host: "0.0.0.0"
+  wsapi_port: 8080
+  workers: 4
+
+suricata:
+  enabled: true
+  interface: "s1-eth1"
+  rules_directory: "/etc/suricata/rules"
+  eve_log: "/var/log/suricata/eve.json"
+  fast_log: "/var/log/suricata/fast.log"
+
+threat_detection:
+  port_scan_threshold: 10
+  syn_flood_threshold: 100
+  failed_auth_threshold: 5
+  anomaly_sensitivity: 0.85
+
+network:
+  topology: "mininet"
+  switches: 3
+  hosts: 6
+  controller_count: 1
+
+security:
+  enable_tls: true
+  tls_cert: "/path/to/cert.pem"
+  tls_key: "/path/to/key.pem"
+  log_retention_days: 90
+
+performance:
+  max_flow_rules: 10000
+  packet_queue_size: 10000
+  worker_threads: 8
+  cache_ttl: 300
+
+logging:
+  level: "INFO"
+  format: "json"
+  output: "file"
+  file_path: "/var/log/sdn-nidps/system.log"
