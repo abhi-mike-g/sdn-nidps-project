@@ -34,31 +34,33 @@ sudo bash scripts/run_attack_demo.sh
 
 ## Architecture
 
+```
 ┌─────────────────────────────────────────┐
 │        Web Dashboard (Port 8000)        │
 │      Advanced Analytics & Reports       │
 └────────────────┬────────────────────────┘
-  │ REST API
+                 │ REST API
 ┌────────────────┴────────────────────────┐
 │     Ryu SDN Controller (Port 6653)      │
 │  - Threat Detection Engine              │
 │  - Flow Rule Management                 │
 │  - Real-time Response                   │
 └────────────────┬────────────────────────┘
-  │ OpenFlow
+                 │ OpenFlow
 ┌────────────────┴────────────────────────┐
 │          Suricata IDS (Real-time)       │
 │  - Packet Inspection                    │
 │  - Signature-Based Detection            │
 │  - EVE JSON Alerts                      │
 └────────────────┬────────────────────────┘
-  │
+                 │
 ┌────────────────┴────────────────────────┐
 │      Mininet Virtual Network            │
 │  ├─ 3x OVS Switches                     │
 │  ├─ 8x Hosts (Legitimate + Attacker)    │
 │  └─ Multiple Network Segments           │
 └─────────────────────────────────────────┘
+```
 
 ## System Requirements
 
