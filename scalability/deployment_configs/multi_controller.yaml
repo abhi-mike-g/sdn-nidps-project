@@ -1,0 +1,76 @@
+# Multi-Controller Deployment Configuration
+
+deployment:
+  name: "sdn-nidps-multi-controller"
+  version: "1.0"
+  mode: "distributed"
+  
+controllers:
+  count: 3
+  replicas: 3
+  
+  controller_1:
+    id: "controller-1"
+    host: "10.0.0.50"
+    port: 6653
+    wsapi_port: 8080
+    region: "primary"
+    
+    resources:
+      cpu: "2000m"
+      memory: "2Gi"
+      
+  controller_2:
+    id: "controller-2"
+    host: "10.0.0.51"
+    port: 6653
+    wsapi_port: 8080
+    region: "secondary"
+    
+    resources:
+      cpu: "2000m"
+      memory: "2Gi"
+      
+  controller_3:
+    id: "controller-3"
+    host: "10.0.0.52"
+    port: 6653
+    wsapi_port: 8080
+    region: "tertiary"
+    
+    resources:
+      cpu: "2000m"
+      memory: "2Gi"
+
+load_balancer:
+  enabled: true
+  type: "round_robin"
+  health_check_interval: 10
+  
+distributed_state:
+  backend: "redis"
+  redis_cluster:
+    nodes:
+      - "10.0.0.60:6379"
+      - "10.0.0.61:6379"
+      - "10.0.0.62:6379"
+    
+threat_correlation:
+  enabled: true
+  aggregation_window: 300
+  
+synchronization:
+  mode: "active-active"
+  sync_interval: 5
+  
+failover:
+  enabled: true
+  timeout: 30
+  
+network:
+  inter_controller_network: "10.0.1.0/24"
+  topology_distribution: "mesh"
+  
+monitoring:
+  prometheus_enabled: true
+  grafana_enabled: true
