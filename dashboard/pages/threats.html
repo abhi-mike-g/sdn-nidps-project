@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threats - SDN-NIDPS</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div id="sidebar"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="header-top">
+                    <h1 class="header-title">🚨 Threats Management</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="filterThreats('all')">
+                            All Threats
+                        </button>
+                        <button class="btn btn-secondary" onclick="filterThreats('critical')">
+                            🔴 Critical
+                        </button>
+                        <button class="btn btn-secondary" onclick="filterThreats('high')">
+                            🟠 High
+                        </button>
+                        <button class="btn btn-primary" onclick="refreshThreats()">
+                            🔄 Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Threat Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">
+                        🚨
+                    </div>
+                    <div class="stat-value" id="totalThreats">0</div>
+                    <div class="stat-label">Total Threats</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">
+                        🔴
+                    </div>
+                    <div class="stat-value" id="criticalThreats">0</div>
+                    <div class="stat-label">Critical</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">
+                        🟠
+                    </div>
+                    <div class="stat-value" id="highThreats">0</div>
+                    <div class="stat-label">High Severity</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">
+                        ✅
+                    </div>
+                    <div class="stat-value" id="mitigatedThreats">0</div>
+                    <div class="stat-label">Mitigated</div>
+                </div>
+            </div>
+
+            <!-- Threat Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Threat Details</div>
+                    <div class="chart-controls">
+                        <input type="text" id="searchInput" placeholder="Search threats..." 
+                               class="form-input" style="max-width: 200px;">
+                        <button class="btn btn-secondary btn-small" onclick="exportThreats()">
+                            📥 Export
+                        </button>
+                    </div>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Threat Type</th>
+                            <th>Severity</th>
+                            <th>Source IP</th>
+                            <th>Target IP</th>
+                            <th>Category</th>
+                            <th>Action</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="threatTable">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 20px;">
+                                Loading threats...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/api.js"></script>
+    <script>
+        let allThreats = [];
+        let currentFilter = 'all';
+
+        async function loadThreats() {
+            try {
+                allThreats = await api.getThreats(500);
+                updateThreatStats();
+                renderThreatTable();
+            } catch (error) {
+                console.error('Error loading threats:', error);
+            }
+        }
+
+        function updateThreatStats() {
+            const stats = {
+                total: allThreats.length,
+                critical: allThreats.filter(t => t.severity === 'CRITICAL').length,
+                high: allThreats.filter(t => t.severity === 'HIGH').length,
+                mitigated: allThreats.filter(t => t.action === 'BLOCK').length
+            };
+
+            document.getElementById('totalThreats').textContent = stats.total;
+            document.getElementById('criticalThreats').textContent = stats.critical;
+            document.getElementById('highThreats').textContent = stats.high;
+            document.getElementById('mitigatedThreats').textContent = stats.mitigated;
+        }
+
+        function renderThreatTable() {
+            const tbody = document.getElementById('threatTable');
+            let filteredThreats = allThreats;
+
+            if (currentFilter !== 'all') {
+                filteredThreats = allThreats.filter(t => 
+                    t.severity.toLowerCase() === currentFilter.toLowerCase()
+                );
+            }
+
+            const searchTerm = document.getElementById('searchInput')?.value || '';
+            if (searchTerm) {
+                filteredThreats = filteredThreats.filter(t =>
+                    t.threat.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    t.source.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }
+
+            if (filteredThreats.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">
