@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  sdn-nidps:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sdn-nidps
+    privileged: true
+    network_mode: host
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    ports:
+      - "6653:6653"
+      - "8080:8080"
+      - "8000:8000"
+    environment:
+      - RYU_PORT=6653
+      - WSAPI_PORT=8080
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: sdn-nidps-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  redis_data:
