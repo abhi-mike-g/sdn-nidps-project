@@ -1,0 +1,109 @@
+{
+  "hosts": [
+    {
+      "name": "h1",
+      "ip": "10.0.0.1",
+      "netmask": "255.255.255.0",
+      "mac": "00:00:00:00:00:01",
+      "type": "legitimate",
+      "services": ["ssh", "http"],
+      "description": "Legitimate host 1",
+      "security_role": "workstation"
+    },
+    {
+      "name": "h2",
+      "ip": "10.0.0.2",
+      "netmask": "255.255.255.0",
+      "mac": "00:00:00:00:00:02",
+      "type": "legitimate",
+      "services": ["ssh", "http"],
+      "description": "Legitimate host 2",
+      "security_role": "workstation"
+    },
+    {
+      "name": "h3",
+      "ip": "10.0.0.3",
+      "netmask": "255.255.255.0",
+      "mac": "00:00:00:00:00:03",
+      "type": "legitimate",
+      "services": ["ssh"],
+      "description": "Legitimate host 3",
+      "security_role": "workstation"
+    },
+    {
+      "name": "h4",
+      "ip": "10.0.0.4",
+      "netmask": "255.255.255.0",
+      "mac": "00:00:00:00:00:04",
+      "type": "legitimate",
+      "services": ["ssh"],
+      "description": "Legitimate host 4",
+      "security_role": "workstation"
+    },
+    {
+      "name": "webserver",
+      "ip": "10.0.0.10",
+      "netmask": "255.255.255.0",
+      "mac": "00:00:00:00:00:10",
+      "type": "legitimate",
+      "services": ["http", "https"],
+      "description": "Web Server",
+      "security_role": "server",
+      "ports": [80, 443, 8080]
+    },
+    {
+      "name": "dbserver",
+      "ip": "10.0.0.11",
+      "netmask": "255.255.255.0",
+      "mac": "00:00:00:00:00:11",
+      "type": "legitimate",
+      "services": ["mysql", "ssh"],
+      "description": "Database Server",
+      "security_role": "server",
+      "ports": [3306, 22]
+    },
+    {
+      "name": "attacker",
+      "ip": "10.0.0.100",
+      "netmask": "255.255.255.0",
+      "mac": "00:00:00:00:01:00",
+      "type": "attacker",
+      "services": ["nc", "nmap"],
+      "description": "Attacker Host - Simulated threat",
+      "security_role": "threat",
+      "attack_capability": true
+    }
+  ],
+  
+  "default_routes": {
+    "gateway": "10.0.0.254",
+    "dns": "8.8.8.8"
+  },
+  
+  "firewall_rules": [
+    {
+      "id": 1,
+      "source": "10.0.0.0/24",
+      "destination": "10.0.0.10",
+      "port": 80,
+      "protocol": "TCP",
+      "action": "ALLOW"
+    },
+    {
+      "id": 2,
+      "source": "10.0.0.0/24",
+      "destination": "10.0.0.11",
+      "port": 3306,
+      "protocol": "TCP",
+      "action": "ALLOW"
+    },
+    {
+      "id": 3,
+      "source": "10.0.0.128/25",
+      "destination": "10.0.0.0/25",
+      "port": -1,
+      "protocol": "ANY",
+      "action": "BLOCK"
+    }
+  ]
+}
