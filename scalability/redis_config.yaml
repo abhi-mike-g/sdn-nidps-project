@@ -1,0 +1,52 @@
+# Redis Configuration for SDN-NIDPS Distributed Features
+
+redis:
+  host: localhost
+  port: 6379
+  db: 0
+  password: null
+  ssl: false
+  
+  persistence:
+    save:
+      - "900 1"      # Save if 1 key changes in 15 minutes
+      - "300 10"     # Save if 10 keys change in 5 minutes
+      - "60 10000"   # Save if 10000 keys change in 1 minute
+    
+    rdb:
+      enabled: true
+      filename: "dump.rdb"
+      compression: true
+    
+    aof:
+      enabled: true
+      filename: "appendonly.aof"
+      fsync: "everysec"
+  
+  memory:
+    maxmemory: "256mb"
+    maxmemory_policy: "allkeys-lru"
+    
+  replication:
+    role: "master"
+    slave_read_only: true
+    
+  cluster:
+    enabled: false
+    nodes: []
+
+  security:
+    requirepass: null
+    masterauth: null
+    
+  performance:
+    timeout: 300
+    tcp_keepalive: 60
+    databases: 16
+    hz: 10
+    
+  keys_ttl:
+    controller_heartbeat: 30
+    threat_cache: 3600
+    blocklist_entry: 3600
+    flow_rule: 86400
