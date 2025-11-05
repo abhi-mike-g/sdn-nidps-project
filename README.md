@@ -15,7 +15,7 @@ A Software-Defined Network (SDN) based Intrusion Detection and Prevention System
 
 ```bash
 # 1. Clone repository
-git clone <repo-url>
+git clone https://www.github.com/abhi-mike-g/sdn-nidps-project
 cd sdn-nidps-project
 
 # 2. Install dependencies
