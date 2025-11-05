@@ -1,0 +1,29 @@
+<footer class="dashboard-footer" style="background: #1a1a2e; border-top: 1px solid #2a2a3e; 
+    padding: 20px; margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; 
+        margin-bottom: 15px; flex-wrap: wrap; gap: 20px;">
+        <div>
+            <strong style="color: #e0e0e0;">SDN-NIDPS v1.0</strong> | 
+            Scalable Network Intrusion Detection & Prevention System
+        </div>
+        <div style="display: flex; gap: 20px;">
+            <a href="#" style="color: #667eea; text-decoration: none;">Documentation</a>
+            <a href="#" style="color: #667eea; text-decoration: none;">Support</a>
+            <a href="#" style="color: #667eea; text-decoration: none;">Report Issue</a>
+        </div>
+    </div>
+
+    <div style="border-top: 1px solid #2a2a3e; padding-top: 15px; font-size: 11px;">
+        <p style="margin: 0;">
+            © 2024 SDN-NIDPS Development Team. All rights reserved.
+        </p>
+        <p style="margin: 5px 0 0 0; color: #666;">
+            Last Updated: <span id="lastUpdate"></span>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
+    </script>
+</footer>
