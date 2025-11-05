@@ -1,0 +1,131 @@
+{
+  "switches": [
+    {
+      "id": "s1",
+      "name": "Core Switch 1",
+      "openflow_version": "1.3",
+      "datapath_id": "0000000000000001",
+      "controller": {
+        "ip": "127.0.0.1",
+        "port": 6653,
+        "protocol": "OpenFlow13"
+      },
+      "config": {
+        "flow_table_size": 10000,
+        "packet_in_rate_limit": 1000,
+        "miss_send_len": 65535,
+        "enable_fragmentation": true
+      },
+      "ports": [
+        {
+          "no": 1,
+          "name": "eth1",
+          "config": {"no_recv": false, "no_fwd": false},
+          "state": {"live": true}
+        },
+        {
+          "no": 2,
+          "name": "eth2",
+          "config": {"no_recv": false, "no_fwd": false},
+          "state": {"live": true}
+        },
+        {
+          "no": 3,
+          "name": "eth3",
+          "config": {"no_recv": false, "no_fwd": false},
+          "state": {"live": true}
+        },
+        {
+          "no": 4,
+          "name": "eth4",
+          "config": {"no_recv": false, "no_fwd": false},
+          "state": {"live": true}
+        }
+      ],
+      "flow_monitoring": {
+        "enabled": true,
+        "interval": 10
+      }
+    },
+    {
+      "id": "s2",
+      "name": "Core Switch 2",
+      "openflow_version": "1.3",
+      "datapath_id": "0000000000000002",
+      "controller": {
+        "ip": "127.0.0.1",
+        "port": 6653,
+        "protocol": "OpenFlow13"
+      },
+      "config": {
+        "flow_table_size": 10000,
+        "packet_in_rate_limit": 1000,
+        "miss_send_len": 65535,
+        "enable_fragmentation": true
+      },
+      "ports": [
+        {
+          "no": 1,
+          "name": "eth1",
+          "config": {"no_recv": false, "no_fwd": false},
+          "state": {"live": true}
+        },
+        {
+          "no": 2,
+          "name": "eth2",
+          "config": {"no_recv": false, "no_fwd": false},
+          "state": {"live": true}
+        },
+        {
+          "no": 3,
+          "name": "eth3",
+          "config": {"no_recv": false, "no_fwd": false},
+          "state": {"live": true}
+        }
+      ],
+      "flow_monitoring": {
+        "enabled": true,
+        "interval": 10
+      }
+    },
+    {
+      "id": "s3",
+      "name": "Attacker Isolation Switch",
+      "openflow_version": "1.3",
+      "datapath_id": "0000000000000003",
+      "controller": {
+        "ip": "127.0.0.1",
+        "port": 6653,
+        "protocol": "OpenFlow13"
+      },
+      "config": {
+        "flow_table_size": 5000,
+        "packet_in_rate_limit": 500,
+        "miss_send_len": 65535,
+        "enable_fragmentation": true,
+        "isolation_mode": true
+      },
+      "ports": [
+        {
+          "no": 1,
+          "name": "eth1",
+          "config": {"no_recv": false, "no_fwd": false},
+          "state": {"live": true}
+        }
+      ],
+      "flow_monitoring": {
+        "enabled": true,
+        "interval": 10
+      }
+    }
+  ],
+  
+  "global_config": {
+    "flow_mod_rate_limit": 100,
+    "packet_in_rate_limit": 1000,
+    "table_miss_strategy": "CONTROLLER",
+    "enable_statistics": true,
+    "enable_port_stats": true,
+    "stats_interval": 10
+  }
+}
