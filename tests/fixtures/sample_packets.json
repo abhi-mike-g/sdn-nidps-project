@@ -1,0 +1,38 @@
+{
+  "packets": [
+    {
+      "id": 1,
+      "timestamp": 1642255200,
+      "src_ip": "192.168.1.100",
+      "dst_ip": "10.0.0.1",
+      "src_port": 12345,
+      "dst_port": 80,
+      "protocol": "TCP",
+      "flags": "SYN",
+      "payload_size": 60,
+      "payload": "..."
+    },
+    {
+      "id": 2,
+      "timestamp": 1642255201,
+      "src_ip": "192.168.1.100",
+      "dst_ip": "10.0.0.1",
+      "src_port": 12346,
+      "dst_port": 443,
+      "protocol": "TCP",
+      "flags": "SYN",
+      "payload_size": 60
+    },
+    {
+      "id": 3,
+      "timestamp": 1642255202,
+      "src_ip": "192.168.1.101",
+      "dst_ip": "10.0.0.1",
+      "src_port": 54321,
+      "dst_port": 22,
+      "protocol": "TCP",
+      "flags": "SYN",
+      "payload_size": 60
+    }
+  ]
+}
