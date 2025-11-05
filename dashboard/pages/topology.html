@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Topology - SDN-NIDPS</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div id="sidebar"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="header-title">🌐 Network Topology</h1>
+            </div>
+
+            <!-- Topology Canvas -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Real-time Network Visualization</div>
+                    <button class="btn btn-primary btn-small" onclick="updateTopology()">
+                        🔄 Refresh
+                    </button>
+                </div>
+                <div id="network" style="width: 100%; height: 600px; border-radius: 8px; background: rgba(42, 42, 62, 0.3);"></div>
+            </div>
+
+            <!-- Topology Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="switchCount">0</div>
+                    <div class="stat-label">Switches</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-value" id="hostCount">0</div>
+                    <div class="stat-label">Hosts</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-value" id="linkCount">0</div>
+                    <div class="stat-label">Links</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-value" id="activeFlows">0</div>
+                    <div class="stat-label">Active Flows</div>
+                </div>
+            </div>
+
+            <!-- Device Details -->
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Switches</div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Switch ID</th>
+                                <th>DPID</th>
+                                <th>Ports</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="switchTable">
+                            <tr><td colspan="4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Hosts</div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Host Name</th>
+                                <th>IP Address</th>
+                                <th>MAC Address</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hostTable">
+                            <tr><td colspan="4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/api.js"></script>
+    <script>
+        let network = null;
+
+        function initializeTopology() {
+            const container = document.getElementById('network');
+            const data = {
+                nodes: new vis.DataSet(),
+                edges: new vis.DataSet()
+            };
+
+            const options = {
+                physics: {
+                    enabled: true,
+                    barnesHut: {
+                        gravitationalConstant: -30000,
+                        centralGravity: 0.3,
+                        springLength: 300,
+                        springConstant: 0.04
+                    }
+                },
+                nodes: {
+                    shape: 'box',
+                    margin: 10,
+                    widthConstraint: {maximum: 200}
+                },
+                edges: {
+                    smooth: {
+                        type: 'continuous'
+                    }
+                }
+            };
+
+            network = new vis.Network(container, data, options);
+        }
+
+        async function updateTopology() {
+            try {
+                const topology = await api.getTopology();
+                renderTopology(topology);
+            } catch (error) {
+                console.error('Error loading topology:', error);
+            }
+        }
+
+        function renderTopology(topology) {
+            if (!network) initializeTopology();
+
+            const nodes = network.body.data.nodes;
+            const edges = network.body.data.edges;
+
+            nodes.clear();
+            edges.clear();
+
+            // Add switches
+            if (topology.switches) {
+                topology.switches.forEach(sw => {
+                    nodes.add({
+                        id: sw.id,
+                        label: sw.name || sw.id,
+                        title: `Switch: ${sw.id}`,
+                        color: '#667eea',
+                        shape: 'database'
+                    });
+                });
+                document.getElementById('switchCount').textContent = topology.switches.length;
+            }
+
+            // Add hosts
+            if (topology.hosts) {
+                topology.hosts.forEach(host => {
+                    const color = host.type === 'attacker' ? '#ef4444' : '#10b981';
+                    nodes.add({
+                        id: host.name,
+                        label: host.name,
+                        title: `${host.name} (${host.ip})`,
+                        color: color,
+                        shape: 'circle'
+                    });
+                });
+                document.getElementById('hostCount').textContent = topology.hosts.length;
+            }
+
+            // Add links
+            if (topology.links) {
+                topology.links.forEach(link => {
+                    edges.add({
+                        from: link.src,
+                        to: link.dst,
+                        title: link.bandwidth || '1Gbps',
+                        smooth: { type: 'continuous' }
+                    });
+                });
+                document.getElementById('linkCount').textContent = topology.links.length;
+            }
+
+            network.fit();
+        }
+
+        // Initialize
+        initializeTopology();
+        updateTopology();
+        setInterval(updateTopology, 10000);
+    </script>
+</body>
+</html>
