@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - SDN-NIDPS</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div id="sidebar"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="header-title">📈 Analytics & Reports</h1>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">Threat Severity Distribution</div>
+                    </div>
+                    <canvas id="severityChart"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">Attack Methods</div>
+                    </div>
+                    <canvas id="attackMethodsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">Threat Timeline (24 hours)</div>
+                    </div>
+                    <canvas id="timelineChart"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">Detection vs Blocking Rate</div>
+                    </div>
+                    <canvas id="detectionRateChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="chart-title">Performance Metrics</div>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-label">Detection Rate</div>
+                        <div class="metric-value" id="detectionRate">97.1%</div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: 97.1%; background: linear-gradient(90deg, #667eea, #764ba2);"></div>
+                        </div>
+                    </div>
+
+                    <div class="metric-box">
+                        <div class="metric-label">False Positive Rate</div>
+                        <div class="metric-value" id="falsePositiveRate">2.9%</div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: 2.9%; background: #ef4444;"></div>
+                        </div>
+                    </div>
+
+                    <div class="metric-box">
+                        <div class="metric-label">Average Response Time</div>
+                        <div class="metric-value" id="avgResponseTime">1.25s</div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: 40%; background: #10b981;"></div>
+                        </div>
+                    </div>
+
+                    <div class="metric-box">
+                        <div class="metric-label">System Uptime</div>
+                        <div class="metric-value" id="systemUptime">99.9%</div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: 99.9%; background: #10b981;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="chart-title">Generate Reports</div>
+                </div>
+                <div class="grid-2" style="padding: 20px;">
+                    <button class="btn btn-primary" onclick="generatePDFReport()">
+                        📄 PDF Report
+                    </button>
+                    <button class="btn btn-primary" onclick="generateExcelReport()">
+                        📊 Excel Report
+                    </button>
+                    <button class="btn btn-primary" onclick="generateJSONReport()">
+                        📋 JSON Export
+                    </button>
+                    <button class="btn btn-primary" onclick="generateCSVReport()">
+                        📑 CSV Export
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/api.js"></script>
+    <script src="../assets/js/charts.js"></script>
+    <script>
+        async function loadAnalytics() {
+            try {
+                const stats = await api.getStats();
+                renderAnalytics(stats);
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        function renderAnalytics(stats) {
+            // Severity distribution chart
+            const severityCtx = document.getElementById('severityChart').getContext('2d');
+            new Chart(severityCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Critical', 'High', 'Medium', 'Low'],
+                    datasets: [{
+                        data: [10, 25, 35, 30],
+                        backgroundColor: ['#ef4444', '#f59e0b', '#eab308', '#10b981']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } }
+                    }
+                }
+            });
+
+            // Attack methods chart
+            const methodsCtx = document.getElementById('attackMethodsChart').getContext('2d');
+            new Chart(methodsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Port Scan', 'Brute Force', 'DDoS', 'SQL Injection', 'XSS'],
+                    datasets: [{
+                        label: 'Count',
+                        data: [45, 32, 28, 18, 12],
+                        backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                        borderColor: '#667eea',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { ticks: { color: '#888' } },
+                        y: { ticks: { color: '#888' } }
+                    }
+                }
+            });
+        }
+
+        function generatePDFReport() {
+            alert('PDF Report generation - implement with jsPDF library');
+        }
+
+        function generateExcelReport() {
+            alert('Excel Report generation - implement with xlsx library');
+        }
+
+        async function generateJSONReport() {
+            const data = await api.getThreats(500);
+            const dataStr = JSON.stringify(data, null, 2);
+            downloadFile(dataStr, 'report.json', 'application/json');
+        }
+
+        async function generateCSVReport() {
+            const data = await api.getThreats(500);
+            const csv = convertToCSV(data);
+            downloadFile(csv, 'report.csv', 'text/csv');
+        }
+
+        function convertToCSV(data) {
+            const headers = ['Timestamp', 'Threat Type', 'Severity', 'Source IP', 'Action'];
+            const rows = data.map(d => [
+                new Date(d.timestamp * 1000).toISOString(),
+                d.threat,
+                d.severity,
+                d.source,
+                d.action
+            ]);
+
+            const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+            return csv;
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+        }
+
+        loadAnalytics();
+    </script>
+</body>
+</html>
