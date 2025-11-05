@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - SDN-NIDPS</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div id="sidebar"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="header-title">⚙️ System Settings</h1>
+            </div>
+
+            <!-- Settings Tabs -->
+            <div class="card">
+                <div class="card-header">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="showTab('general')">General</button>
+                        <button class="btn btn-secondary" onclick="showTab('detection')">Detection</button>
+                        <button class="btn btn-secondary" onclick="showTab('response')">Response</button>
+                        <button class="btn btn-secondary" onclick="showTab('logging')">Logging</button>
+                        <button class="btn btn-secondary" onclick="showTab('advanced')">Advanced</button>
+                    </div>
+                </div>
+
+                <!-- General Settings -->
+                <div id="generalTab" class="tab-content" style="padding: 20px;">
+                    <h3 style="margin-bottom: 15px;">General Configuration</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">System Name</label>
+                        <input type="text" class="form-input" value="SDN-NIDPS" id="sysName">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Controller Address</label>
+                        <input type="text" class="form-input" value="127.0.0.1:6653" id="controllerAddr">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Database Location</label>
+                        <input type="text" class="form-input" value="/var/lib/sdn-nidps/threats.db" id="dbLocation">
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveSettings('general')">Save Changes</button>
+                </div>
+
+                <!-- Detection Settings -->
+                <div id="detectionTab" class="tab-content" style="display: none; padding: 20px;">
+                    <h3 style="margin-bottom: 15px;">Threat Detection Thresholds</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Port Scan Threshold</label>
+                        <input type="number" class="form-input" value="10" id="portScanThreshold">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">SYN Flood Threshold</label>
+                        <input type="number" class="form-input" value="100" id="synFloodThreshold">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">UDP Flood Threshold</label>
+                        <input type="number" class="form-input" value="500" id="udpFloodThreshold">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Failed Auth Threshold</label>
+                        <input type="number" class="form-input" value="5" id="authThreshold">
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveSettings('detection')">Save Thresholds</button>
+                </div>
+
+                <!-- Response Settings -->
+                <div id="responseTab" class="tab-content" style="display: none; padding: 20px;">
+                    <h3 style="margin-bottom: 15px;">Automated Response Settings</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Enable Auto Response</label>
+                        <input type="checkbox" id="autoResponse" checked>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Response Timeout (seconds)</label>
+                        <input type="number" class="form-input" value="300" id="responseTimeout">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Max Blocked Hosts</label>
+                        <input type="number" class="form-input" value="1000" id="maxBlocked">
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveSettings('response')">Save Response Settings</button>
+                </div>
+
+                <!-- Logging Settings -->
+                <div id="loggingTab" class="tab-content" style="display: none; padding: 20px;">
+                    <h3 style="margin-bottom: 15px;">Logging Configuration</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Log Level</label>
+                        <select class="form-select" id="logLevel">
+                            <option>DEBUG</option>
+                            <option selected>INFO</option>
+                            <option>WARNING</option>
+                            <option>ERROR</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Log Retention (days)</label>
+                        <input type="number" class="form-input" value="90" id="logRetention">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Enable Syslog</label>
+                        <input type="checkbox" id="enableSyslog" checked>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveSettings('logging')">Save Logging Settings</button>
+                </div>
+
+                <!-- Advanced Settings -->
+                <div id="advancedTab" class="tab-content" style="display: none; padding: 20px;">
+                    <h3 style="margin-bottom: 15px;">Advanced Configuration</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Max Workers</label>
+                        <input type="number" class="form-input" value="8" id="maxWorkers">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Queue Size</label>
+                        <input type="number" class="form-input" value="10000" id="queueSize">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Enable TLS</label>
+                        <input type="checkbox" id="enableTLS" checked>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveSettings('advanced')">Save Advanced Settings</button>
+                    <button class="btn btn-danger" onclick="resetToDefaults()">Reset to Defaults</button>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <div class="card-title">System Information</div>
+                </div>
+                <table class="table">
+                    <tr>
+                        <td><strong>Version</strong></td>
+                        <td>1.0.0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Build Date</strong></td>
+                        <td>2024-01-15</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Uptime</strong></td>
+                        <td id="uptimeDisplay">--</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Last Update</strong></td>
+                        <td id="lastUpdateDisplay">--</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').style.display = 'block';
+        }
+
+        function saveSettings(category) {
+            alert(`${category} settings saved successfully`);
+        }
+
+        function resetToDefaults() {
+            if (confirm('Reset all settings to defaults?')) {
+                alert('Settings reset to defaults');
+            }
+        }
+
+        // Update system info
+        setInterval(() => {
+            document.getElementById('uptimeDisplay').textContent = 
+                new Date(Date.now() - 86400000).toLocaleString();
+            document.getElementById('lastUpdateDisplay').textContent = 
+                new Date().toLocaleString();
+        }, 60000);
+    </script>
+</body>
+</html>
