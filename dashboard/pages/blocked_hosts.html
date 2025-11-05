@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blocked Hosts - SDN-NIDPS</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div id="sidebar"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="header-top">
+                    <h1 class="header-title">🚫 Blocked Hosts Management</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="refreshBlockedHosts()">
+                            🔄 Refresh
+                        </button>
+                        <button class="btn btn-secondary" onclick="showAddBlockDialog()">
+                            ➕ Block Host
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalBlocked">0</div>
+                    <div class="stat-label">Total Blocked Hosts</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-value" id="permanentBlocked">0</div>
+                    <div class="stat-label">Permanent Blocks</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-value" id="temporaryBlocked">0</div>
+                    <div class="stat-label">Temporary Blocks</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-value" id="blockageRate">0%</div>
+                    <div class="stat-label">Blockage Effectiveness</div>
+                </div>
+            </div>
+
+            <!-- Blocked Hosts Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Blocked Hosts List</div>
+                    <input type="text" id="searchBlocked" placeholder="Search IP..." 
+                           class="form-input" style="max-width: 200px;">
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>IP Address</th>
+                            <th>Reason</th>
+                            <th>Block Type</th>
+                            <th>Blocked Since</th>
+                            <th>Expires</th>
+                            <th>Threat Count</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="blockedTable">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 20px;">
+                                Loading blocked hosts...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Block History -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Recent Block Actions</div>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Action</th>
+                            <th>IP Address</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTable">
+                        <tr>
+                            <td colspan="5" style="text-align: center;">No history</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Block Dialog -->
+    <div id="addBlockDialog" style="display: none; position: fixed; top: 50%; left: 50%; 
+         transform: translate(-50%, -50%); background: #1a1a2e; border: 1px solid #2a2a3e; 
+         border-radius: 12px; padding: 30px; z-index: 1000; min-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <h2 style="margin-bottom: 20px;">Block Host</h2>
+        <div class="form-group">
+            <label class="form-label">IP Address</label>
+            <input type="text" id="blockIP" class="form-input" placeholder="10.0.0.100">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Reason</label>
+            <select id="blockReason" class="form-select">
+                <option>Port Scanning</option>
+                <option>DDoS Attack</option>
+                <option>Brute Force</option>
+                <option>Malware Detection</option>
+                <option>Manual Block</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Block Type</label>
+            <select id="blockType" class="form-select">
+                <option>Temporary (1 hour)</option>
+                <option>Temporary (24 hours)</option>
+                <option>Permanent</option>
+            </select>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="btn btn-secondary" onclick="closeAddBlockDialog()">Cancel</button>
+            <button class="btn btn-danger" onclick="confirmBlock()">Block Host</button>
+        </div>
+    </div>
+
+    <div id="dialogOverlay" style="display: none; position: fixed; top: 0; left: 0; 
+         right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;" 
+         onclick="closeAddBlockDialog()"></div>
+
+    <script src="../assets/js/api.js"></script>
+    <script>
+        let blockedHosts = [];
+
+        async function loadBlockedHosts() {
+            try {
+                const response = await api.getBlockedHosts();
+                blockedHosts = response.blocked_hosts || [];
+                updateBlockStats();
+                renderBlockedHostsTable();
+            } catch (error) {
+                console.error('Error loading blocked hosts:', error);
+            }
+        }
+
+        function updateBlockStats() {
+            document.getElementById('totalBlocked').textContent = blockedHosts.length;
+            // Add more stats as needed
+        }
+
+        function renderBlockedHostsTable() {
+            const tbody = document.getElementById('blockedTable');
+            
+            if (blockedHosts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No blocked hosts</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = blockedHosts.map(host => `
+                <tr>
+                    <td><code>${host}</code></td>
+                    <td>Threat Detection</td>
+                    <td><span class="badge badge-high">Automatic</span></td>
+                    <td>${new Date().toLocaleString()}</td>
+                    <td>${new Date(Date.now() + 3600000).toLocaleString()}</td>
+                    <td>5</td>
+                    <td>
+                        <button class="btn btn-small btn-secondary" onclick="unblockHost('${host}')">
+                            Unblock
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showAddBlockDialog() {
+            document.getElementById('addBlockDialog').style.display = 'block';
+            document.getElementById('dialogOverlay').style.display = 'block';
+        }
+
+        function closeAddBlockDialog() {
+            document.getElementById('addBlockDialog').style.display = 'none';
+            document.getElementById('dialogOverlay').style.display = 'none';
+        }
+
+        async function confirmBlock() {
+            const ip = document.getElementById('blockIP').value;
+            try {
+                await api.blockHost(ip);
+                alert('Host blocked successfully');
+                closeAddBlockDialog();
+                loadBlockedHosts();
+            } catch (error) {
+                alert('Error blocking host: ' + error.message);
+            }
+        }
+
+        async function unblockHost(ip) {
+            try {
+                await api.unblockHost(ip);
+                alert('Host unblocked successfully');
+                loadBlockedHosts();
+            } catch (error) {
+                alert('Error unblocking host: ' + error.message);
+            }
+        }
+
+        function refreshBlockedHosts() {
+            loadBlockedHosts();
+        }
+
+        // Initialize
+        loadBlockedHosts();
+        setInterval(loadBlockedHosts, 10000);
+    </script>
+</body>
+</html>
