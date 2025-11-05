@@ -1,0 +1,139 @@
+{
+  "topology": {
+    "name": "SDN-NIDPS Test Network",
+    "version": "1.0",
+    "description": "Multi-segment SDN network for security testing",
+    
+    "switches": [
+      {
+        "id": "s1",
+        "protocol": "OpenFlow13",
+        "dpid": "00:00:00:00:00:00:00:01",
+        "description": "Core Switch 1 - Main network segment",
+        "ports": [
+          {"port": 1, "connected_to": "h1"},
+          {"port": 2, "connected_to": "h2"},
+          {"port": 3, "connected_to": "webserver"},
+          {"port": 4, "connected_to": "s2"},
+          {"port": 5, "connected_to": "s3"}
+        ]
+      },
+      {
+        "id": "s2",
+        "protocol": "OpenFlow13",
+        "dpid": "00:00:00:00:00:00:00:02",
+        "description": "Core Switch 2 - Secondary segment",
+        "ports": [
+          {"port": 1, "connected_to": "h3"},
+          {"port": 2, "connected_to": "h4"},
+          {"port": 3, "connected_to": "dbserver"},
+          {"port": 4, "connected_to": "s1"},
+          {"port": 5, "connected_to": "s3"}
+        ]
+      },
+      {
+        "id": "s3",
+        "protocol": "OpenFlow13",
+        "dpid": "00:00:00:00:00:00:00:03",
+        "description": "Attacker Network - Isolated segment",
+        "ports": [
+          {"port": 1, "connected_to": "attacker"},
+          {"port": 2, "connected_to": "s1"},
+          {"port": 3, "connected_to": "s2"}
+        ]
+      }
+    ],
+
+    "links": [
+      {
+        "src": "h1",
+        "dst": "s1",
+        "bandwidth": "1Gbps",
+        "latency": "1ms"
+      },
+      {
+        "src": "h2",
+        "dst": "s1",
+        "bandwidth": "1Gbps",
+        "latency": "1ms"
+      },
+      {
+        "src": "h3",
+        "dst": "s2",
+        "bandwidth": "1Gbps",
+        "latency": "1ms"
+      },
+      {
+        "src": "h4",
+        "dst": "s2",
+        "bandwidth": "1Gbps",
+        "latency": "1ms"
+      },
+      {
+        "src": "attacker",
+        "dst": "s3",
+        "bandwidth": "1Gbps",
+        "latency": "1ms"
+      },
+      {
+        "src": "webserver",
+        "dst": "s1",
+        "bandwidth": "1Gbps",
+        "latency": "1ms"
+      },
+      {
+        "src": "dbserver",
+        "dst": "s2",
+        "bandwidth": "1Gbps",
+        "latency": "1ms"
+      },
+      {
+        "src": "s1",
+        "dst": "s2",
+        "bandwidth": "10Gbps",
+        "latency": "0.5ms"
+      },
+      {
+        "src": "s2",
+        "dst": "s3",
+        "bandwidth": "10Gbps",
+        "latency": "0.5ms"
+      },
+      {
+        "src": "s1",
+        "dst": "s3",
+        "bandwidth": "10Gbps",
+        "latency": "0.5ms"
+      }
+    ],
+
+    "controller": {
+      "name": "sdn-controller",
+      "ip": "127.0.0.1",
+      "port": 6653,
+      "protocol": "OpenFlow13"
+    },
+
+    "network_segments": [
+      {
+        "name": "Internal Network",
+        "prefix": "10.0.0.0/24",
+        "hosts": ["h1", "h2", "h3", "h4", "webserver", "dbserver"],
+        "security_level": "HIGH"
+      },
+      {
+        "name": "DMZ",
+        "prefix": "10.0.0.0/25",
+        "hosts": ["webserver", "dbserver"],
+        "security_level": "MEDIUM"
+      },
+      {
+        "name": "Attacker Network",
+        "prefix": "10.0.0.128/25",
+        "hosts": ["attacker"],
+        "security_level": "LOW",
+        "restricted": true
+      }
+    ]
+  }
+}
