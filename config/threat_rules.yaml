@@ -1,0 +1,67 @@
+# Threat Detection Rules Configuration
+
+detection_rules:
+  port_scanning:
+    enabled: true
+    threshold: 10
+    time_window: 5
+    severity: HIGH
+    response: BLOCK
+    
+  syn_flood:
+    enabled: true
+    threshold: 100
+    time_window: 1
+    severity: CRITICAL
+    response: BLOCK
+    
+  udp_flood:
+    enabled: true
+    threshold: 500
+    time_window: 1
+    severity: CRITICAL
+    response: BLOCK
+    
+  arp_spoofing:
+    enabled: true
+    threshold: 5
+    time_window: 10
+    severity: CRITICAL
+    response: BLOCK
+    
+  brute_force:
+    enabled: true
+    threshold: 5
+    time_window: 60
+    severity: HIGH
+    response: BLOCK
+    
+  sql_injection:
+    enabled: true
+    severity: CRITICAL
+    response: BLOCK
+    patterns:
+      - "' OR '1'='1"
+      - "'; DROP TABLE"
+      - "UNION SELECT"
+      
+  xss_attack:
+    enabled: true
+    severity: HIGH
+    response: BLOCK
+    patterns:
+      - "<script>"
+      - "javascript:"
+      - "onerror="
+
+response_actions:
+  BLOCK:
+    timeout: 3600
+    log_level: CRITICAL
+    
+  MONITOR:
+    log_level: WARNING
+    alert: true
+    
+  LOG:
+    log_level: INFO
