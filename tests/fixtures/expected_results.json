@@ -1,0 +1,27 @@
+{
+  "test_port_scan_detection": {
+    "expected": true,
+    "threat_type": "Port Scan",
+    "severity": "HIGH"
+  },
+  "test_syn_flood_detection": {
+    "expected": true,
+    "threat_type": "SYN Flood",
+    "severity": "CRITICAL"
+  },
+  "test_sql_injection_detection": {
+    "expected": true,
+    "threat_type": "SQL Injection",
+    "severity": "CRITICAL"
+  },
+  "test_xss_detection": {
+    "expected": true,
+    "threat_type": "XSS Attack",
+    "severity": "HIGH"
+  },
+  "test_brute_force_detection": {
+    "expected": true,
+    "threat_type": "Brute Force",
+    "severity": "HIGH"
+  }
+}
