@@ -1,0 +1,48 @@
+# Performance Tuning Configuration
+
+performance:
+  threading:
+    worker_threads: 8
+    io_threads: 4
+    queue_threads: 2
+    max_thread_pool_size: 50
+  
+  caching:
+    enabled: true
+    ttl: 300
+    max_size: 10000
+    
+    cache_strategies:
+      threat_cache:
+        ttl: 600
+        max_size: 5000
+      
+      flow_cache:
+        ttl: 300
+        max_size: 10000
+  
+  packet_processing:
+    batch_size: 100
+    batch_timeout: 100  # milliseconds
+    max_packet_queue: 50000
+    
+  flow_management:
+    flow_table_size: 10000
+    flow_idle_timeout: 30
+    flow_hard_timeout: 300
+    
+  network_optimization:
+    tcp_buffer_size: 65536
+    udp_buffer_size: 65536
+    socket_recv_buffer: 262144
+    socket_send_buffer: 262144
+  
+  memory_management:
+    gc_enabled: true
+    gc_frequency: 60
+    memory_threshold: 85
+    
+  database:
+    connection_pool_size: 10
+    batch_insert_size: 1000
+    query_timeout: 30
