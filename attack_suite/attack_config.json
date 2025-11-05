@@ -1,0 +1,165 @@
+{
+  "attack_scenarios": {
+    "external_reconnaissance": {
+      "name": "External Network Reconnaissance",
+      "description": "Simulates attacker probing network from outside",
+      "phases": [
+        {
+          "phase": "DNS Enumeration",
+          "command": "nslookup example.com",
+          "duration": 5,
+          "severity": "LOW"
+        },
+        {
+          "phase": "Ping Sweep",
+          "command": "ping -c 1 TARGET",
+          "duration": 10,
+          "severity": "LOW"
+        },
+        {
+          "phase": "Port Scanning",
+          "command": "nmap -p 1-1000 --max-rate 100 TARGET",
+          "duration": 30,
+          "severity": "MEDIUM"
+        },
+        {
+          "phase": "Service Detection",
+          "command": "nmap -sV TARGET",
+          "duration": 30,
+          "severity": "MEDIUM"
+        }
+      ],
+      "expected_detection_rate": 0.95,
+      "expected_response_time": 2
+    },
+    "syn_flood": {
+      "name": "SYN Flood DDoS Attack",
+      "description": "High-volume SYN packet attack",
+      "attack_type": "Denial of Service",
+      "stride_category": "Denial of Service",
+      "command": "hping3 -S -p 80 --flood TARGET",
+      "duration": 20,
+      "severity": "CRITICAL",
+      "packet_rate": 1000,
+      "expected_detection": true,
+      "expected_response_time": 0.5,
+      "mitigation": "BLOCK"
+    },
+    "udp_flood": {
+      "name": "UDP Flood Attack",
+      "description": "High-volume UDP packet attack",
+      "attack_type": "Denial of Service",
+      "stride_category": "Denial of Service",
+      "command": "hping3 --udp -p 53 --flood TARGET",
+      "duration": 20,
+      "severity": "CRITICAL",
+      "packet_rate": 500,
+      "expected_detection": true,
+      "expected_response_time": 0.5,
+      "mitigation": "RATE_LIMIT"
+    },
+    "arp_spoofing": {
+      "name": "ARP Cache Poisoning",
+      "description": "MITM attack through ARP spoofing",
+      "attack_type": "Spoofing",
+      "stride_category": "Spoofing",
+      "command": "arpspoof -t TARGET GATEWAY",
+      "duration": 30,
+      "severity": "CRITICAL",
+      "expected_detection": true,
+      "expected_response_time": 1,
+      "mitigation": "BLOCK"
+    },
+    "sql_injection": {
+      "name": "SQL Injection Attack",
+      "description": "SQL injection against web application",
+      "attack_type": "SQL Injection",
+      "stride_category": "Elevation of Privilege",
+      "payloads": [
+        "' OR '1'='1",
+        "admin'--",
+        "1' UNION SELECT NULL--",
+        "'; DROP TABLE users--"
+      ],
+      "duration": 10,
+      "severity": "CRITICAL",
+      "expected_detection": true,
+      "expected_response_time": 1,
+      "mitigation": "BLOCK"
+    },
+    "brute_force": {
+      "name": "SSH Brute Force Attack",
+      "description": "Password guessing against SSH",
+      "attack_type": "Brute Force",
+      "stride_category": "Elevation of Privilege",
+      "usernames": ["admin", "root", "user", "test"],
+      "passwords": ["password", "123456", "admin", "root", "test"],
+      "duration": 30,
+      "severity": "HIGH",
+      "attempts": 20,
+      "expected_detection": true,
+      "expected_response_time": 2,
+      "mitigation": "BLOCK"
+    },
+    "port_scan": {
+      "name": "Nmap Port Scan",
+      "description": "Reconnaissance port scanning",
+      "attack_type": "Port Scanning",
+      "stride_category": "Information Disclosure",
+      "command": "nmap -sS -p 1-1000 TARGET",
+      "duration": 30,
+      "severity": "HIGH",
+      "ports_scanned": 1000,
+      "expected_detection": true,
+      "expected_response_time": 1.5,
+      "mitigation": "BLOCK"
+    },
+    "xss_attack": {
+      "name": "Cross-Site Scripting",
+      "description": "XSS payload injection",
+      "attack_type": "XSS",
+      "stride_category": "Elevation of Privilege",
+      "payloads": [
+        "<script>alert('XSS')</script>",
+        "<img src=x onerror=alert('XSS')>",
+        "<svg/onload=alert('XSS')>",
+        "javascript:alert('XSS')"
+      ],
+      "duration": 10,
+      "severity": "HIGH",
+      "expected_detection": true,
+      "expected_response_time": 1,
+      "mitigation": "BLOCK"
+    }
+  },
+  "global_settings": {
+    "target_network": "10.0.0.0/24",
+    "attacker_host": "10.0.0.100",
+    "legitimate_hosts": ["10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4"],
+    "web_server": "10.0.0.10",
+    "database_server": "10.0.0.11",
+    "default_timeout": 60,
+    "retry_attempts": 3,
+    "log_verbosity": "INFO",
+    "generate_reports": true
+  },
+  "detection_thresholds": {
+    "port_scan_threshold": 10,
+    "syn_flood_threshold": 100,
+    "udp_flood_threshold": 500,
+    "failed_auth_threshold": 5,
+    "connection_rate_threshold": 1000
+  },
+  "demo_sequence": {
+    "order": [
+      "external_reconnaissance",
+      "port_scan",
+      "brute_force",
+      "sql_injection",
+      "syn_flood",
+      "arp_spoofing"
+    ],
+    "pause_between_attacks": 5,
+    "total_duration": 300
+  }
+}
