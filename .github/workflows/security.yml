@@ -1,0 +1,49 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 2 * * 0'  # Weekly
+
+jobs:
+  security:
+    runs-on: ubuntu-20.04
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        pip install bandit safety pylint
+    
+    - name: Security check with Bandit
+      run: |
+        bandit -r src -ll -f json -o bandit-report.json || true
+        bandit -r src -ll
+    
+    - name: Check dependencies with Safety
+      run: |
+        safety check --file requirements.txt || true
+    
+    - name: Code quality with Pylint
+      run: |
+        pylint src --max-line-length=127 || true
+    
+    - name: CodeQL Analysis
+      uses: github/codeql-action/init@v2
+      with:
+        languages: python
+    
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
