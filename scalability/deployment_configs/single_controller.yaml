@@ -1,0 +1,51 @@
+# Single Controller Deployment Configuration
+
+deployment:
+  name: "sdn-nidps-single-controller"
+  version: "1.0"
+  mode: "single"
+  
+controller:
+  count: 1
+  replicas: 1
+  controller_1:
+    id: "controller-1"
+    host: "localhost"
+    port: 6653
+    wsapi_port: 8080
+    
+    resources:
+      cpu: "2000m"
+      memory: "2Gi"
+      
+    config:
+      worker_threads: 4
+      packet_queue_size: 10000
+      flow_table_size: 10000
+      
+network:
+  topology: "mininet"
+  switches: 3
+  hosts: 8
+  
+database:
+  type: "sqlite"
+  path: "/var/lib/sdn-nidps/threats.db"
+  backup_interval: 3600
+  
+ids:
+  type: "suricata"
+  enabled: true
+  interface: "s1-eth1"
+  
+logging:
+  level: "INFO"
+  format: "json"
+  
+monitoring:
+  prometheus_enabled: false
+  grafana_enabled: false
+  
+storage:
+  data_dir: "/var/lib/sdn-nidps"
+  log_dir: "/var/log/sdn-nidps"
