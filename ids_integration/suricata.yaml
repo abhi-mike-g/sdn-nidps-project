@@ -1,0 +1,168 @@
+# Suricata Configuration for SDN-NIDPS
+
+vars:
+  address-groups:
+    HOME_NET: "[10.0.0.0/8]"
+    EXTERNAL_NET: "!$HOME_NET"
+    DMZ_NET: "[10.0.0.0/24]"
+    PROTECTED_NET: "[10.0.0.0/16]"
+
+  port-groups:
+    HTTP_PORTS: "80"
+    SHELLCODE_PORTS: "!80"
+    ORACLE_PORTS: "1521"
+    SSH_PORTS: "22"
+    DNP3_PORTS: "20000"
+    MODBUS_PORTS: "502"
+    FILE_DATA_PORTS: "[$HTTP_PORTS,110,143]"
+    FTP_PORTS: "21"
+    MAIL_PORTS: "[25,143,465,587,993,995]"
+    MYSQL_PORTS: "3306"
+
+default-rule-path: /etc/suricata/rules
+rule-files:
+  - custom.rules
+  - sdn-specific.rules
+
+classification-file: /etc/suricata/classification.config
+reference-config-file: /etc/suricata/reference.config
+
+# Logging configuration
+outputs:
+  - fast:
+      enabled: yes
+      filename: fast.log
+      append: yes
+  
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json
+      types:
+        - alert:
+            payload: yes
+            payload-buffer-size: 4kb
+            tagged-packets: yes
+        - http:
+            extended: yes
+        - dns:
+            enabled: yes
+        - tls:
+            enabled: yes
+        - flow:
+            enabled: yes
+        - netflow:
+            enabled: yes
+        - drop:
+            enabled: yes
+        - stats:
+            enabled: yes
+            totals: yes
+
+  - stats:
+      enabled: yes
+      filename: stats.log
+      interval: 8
+
+# AF-PACKET for real-time monitoring
+af-packet:
+  - interface: s1-eth1
+    threads: auto
+    cluster-type: cluster_flow
+    defrag: yes
+    use-mmap: yes
+    ring-size: 2048
+    block-size: 32768
+
+# Flow settings
+flow:
+  memcap: 33mb
+  hash-size: 65536
+  prealloc: 10000
+  emergency-recovery: 30
+
+# Logging configuration
+logging:
+  default-log-level: info
+  outputs:
+  - console:
+      enabled: yes
+  - file:
+      enabled: yes
+      filename: suricata.log
+  - syslog:
+      enabled: yes
+      facility: local5
+      format: "[%i] %l"
+
+# Detect-settings
+detect:
+  profile: medium
+  custom-values:
+    toclient_src_groups: 2
+    toclient_dst_groups: 2
+    toclient_sp_groups: 2
+    toclient_dp_groups: 3
+    toserver_src_groups: 2
+    toserver_dst_groups: 4
+    toserver_sp_groups: 2
+    toserver_dp_groups: 4
+
+# Protocol specifics
+http-log:
+  extended: yes
+  custom-log-format: "%{%H:%M:%S}t.%z %{X-Forwarded-For}i %H %m %u %s %B %{Referer}i %{User-Agent}i"
+
+# Performance tuning
+performance:
+  - sgh-mpm-context: auto
+  - inspection-recursion-limit: 1500
+  - preproc-threads: 2
+
+# Defragmentation
+defrag:
+  memcap: 32mb
+  hash-size: 65536
+  trackers: 65536
+  max-frags: 65535
+  prealloc: yes
+  timeout: 60
+
+# Asymmetric flow tuning
+asn1-max-frames: 256
+
+# Threading
+threading:
+  set-cpu-affinity: no
+  cpu-affinity:
+    - management-cpu-set:
+        cpu: [0]
+    - receive-cpu-set:
+        cpu: [0]
+    - worker-cpu-set:
+        cpu: [0,1]
+
+# Luajit configuration
+lua:
+  scripts:
+    - /etc/suricata/lua/my-script.lua
+
+# Auxiliary detection modules
+app-layer:
+  protocols:
+    tls:
+      enabled: yes
+    http:
+      enabled: yes
+    ftp:
+      enabled: yes
+    ssh:
+      enabled: yes
+    smtp:
+      enabled: yes
+    dns:
+      enabled: yes
+      tcp:
+        enabled: yes
+      udp:
+        enabled: yes
