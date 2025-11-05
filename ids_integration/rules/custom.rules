@@ -1,0 +1,327 @@
+# SDN-NIDPS Custom Detection Rules
+# Author: SDN-NIDPS Development Team
+
+# ==================== PORT SCANNING ====================
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"NMAP SYN Scan Detected"; 
+    flags:S,12; 
+    threshold: type threshold, track by_src, count 10, seconds 5;
+    classtype:attempted-recon; 
+    sid:1000001; 
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"NMAP NULL/FIN/XMAS Scan Detected";
+    flags:!A,!S,!R,!0;
+    threshold: type threshold, track by_src, count 5, seconds 5;
+    classtype:attempted-recon;
+    sid:1000002;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"TCP Connect Scan Detected";
+    flags:S,12;
+    threshold: type threshold, track by_src, count 30, seconds 10;
+    classtype:attempted-recon;
+    sid:1000003;
+    rev:1;
+)
+
+# ==================== DDoS ATTACKS ====================
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"SYN Flood Attack Detected";
+    flags:S;
+    threshold: type threshold, track by_dst, count 100, seconds 1;
+    classtype:attempted-dos;
+    sid:1000010;
+    rev:1;
+)
+
+alert udp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"UDP Flood Attack Detected";
+    threshold: type threshold, track by_dst, count 500, seconds 1;
+    classtype:attempted-dos;
+    sid:1000011;
+    rev:1;
+)
+
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"ICMP Flood Attack Detected";
+    itype:8;
+    threshold: type threshold, track by_dst, count 100, seconds 1;
+    classtype:attempted-dos;
+    sid:1000012;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"HTTP Slowloris Attack Detected";
+    flow:to_server,established;
+    content:"GET";
+    threshold: type threshold, track by_src, count 100, seconds 60;
+    classtype:attempted-dos;
+    sid:1000013;
+    rev:1;
+)
+
+# ==================== ARP ATTACKS ====================
+
+alert arp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"ARP Spoofing Attempt Detected";
+    arp_opcode:reply;
+    threshold: type threshold, track by_src, count 5, seconds 10;
+    classtype:network-scan;
+    sid:1000020;
+    rev:1;
+)
+
+alert arp any any -> any any (
+    msg:"Suspicious ARP Activity";
+    arp_opcode:request;
+    threshold: type threshold, track by_src, count 20, seconds 5;
+    classtype:network-scan;
+    sid:1000021;
+    rev:1;
+)
+
+# ==================== DNS ATTACKS ====================
+
+alert dns $EXTERNAL_NET any -> $HOME_NET 53 (
+    msg:"DNS Amplification Attack Attempt";
+    dns_opcode:QUERY;
+    dns_query; content:"."; isdataat:!1,relative;
+    threshold: type threshold, track by_src, count 10, seconds 5;
+    classtype:attempted-dos;
+    sid:1000030;
+    rev:1;
+)
+
+alert dns any any -> any any (
+    msg:"DNS Data Exfiltration Attempt";
+    dns_opcode:QUERY;
+    threshold: type threshold, track by_src, count 50, seconds 10;
+    classtype:bad-unknown;
+    sid:1000031;
+    rev:1;
+)
+
+# ==================== SQL INJECTION ====================
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"SQL Injection - UNION based";
+    flow:to_server,established;
+    content:"union";
+    nocase;
+    content:"select";
+    nocase;
+    distance:0;
+    classtype:web-application-attack;
+    sid:1000040;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"SQL Injection - OR 1=1";
+    flow:to_server,established;
+    content:"or";
+    nocase;
+    content:"1=1";
+    nocase;
+    distance:0;
+    classtype:web-application-attack;
+    sid:1000041;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"SQL Injection - DROP TABLE";
+    flow:to_server,established;
+    content:"drop";
+    nocase;
+    content:"table";
+    nocase;
+    distance:0;
+    classtype:web-application-attack;
+    sid:1000042;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"SQL Injection - Comment bypass";
+    flow:to_server,established;
+    pcre:"/(\-\-|#|\/\*)/";
+    classtype:web-application-attack;
+    sid:1000043;
+    rev:1;
+)
+
+# ==================== XSS ATTACKS ====================
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"XSS - Script Tag";
+    flow:to_server,established;
+    content:"<script";
+    nocase;
+    classtype:web-application-attack;
+    sid:1000050;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"XSS - JavaScript Protocol";
+    flow:to_server,established;
+    content:"javascript:";
+    nocase;
+    classtype:web-application-attack;
+    sid:1000051;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"XSS - Event Handler";
+    flow:to_server,established;
+    pcre:"/(on\w+\s*=)/i";
+    classtype:web-application-attack;
+    sid:1000052;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"XSS - SVG/IFRAME";
+    flow:to_server,established;
+    content:"<svg";
+    nocase;
+    classtype:web-application-attack;
+    sid:1000053;
+    rev:1;
+)
+
+# ==================== COMMAND INJECTION ====================
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"Command Injection - Semicolon";
+    flow:to_server,established;
+    pcre:"/[;&|`$()]/";
+    classtype:web-application-attack;
+    sid:1000060;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"Command Injection - Pipe";
+    flow:to_server,established;
+    content:"|";
+    classtype:web-application-attack;
+    sid:1000061;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"Command Injection - Backticks";
+    flow:to_server,established;
+    content:"`";
+    classtype:web-application-attack;
+    sid:1000062;
+    rev:1;
+)
+
+# ==================== BRUTE FORCE ====================
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET 22 (
+    msg:"SSH Brute Force Attempt";
+    flow:to_server,established;
+    threshold: type threshold, track by_src, count 5, seconds 60;
+    classtype:attempted-admin;
+    sid:1000070;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET 3389 (
+    msg:"RDP Brute Force Attempt";
+    flow:to_server,established;
+    threshold: type threshold, track by_src, count 5, seconds 60;
+    classtype:attempted-admin;
+    sid:1000071;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"HTTP Brute Force - Failed Logins";
+    flow:to_server,established;
+    content:"POST";
+    http_method;
+    content:"login";
+    nocase;
+    http_uri;
+    threshold: type threshold, track by_src, count 10, seconds 60;
+    classtype:attempted-admin;
+    sid:1000072;
+    rev:1;
+)
+
+# ==================== SUSPICIOUS BEHAVIOR ====================
+
+alert tcp any any -> any any (
+    msg:"Suspicious Port Activity";
+    flow:established;
+    threshold: type threshold, track by_src, count 100, seconds 10;
+    classtype:bad-unknown;
+    sid:1000100;
+    rev:1;
+)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (
+    msg:"Unusual Outbound Traffic";
+    flow:to_server,established;
+    threshold: type threshold, track by_src, count 1000, seconds 60;
+    classtype:bad-unknown;
+    sid:1000101;
+    rev:1;
+)
+
+# ==================== LATERAL MOVEMENT ====================
+
+alert tcp $HOME_NET any -> $HOME_NET any (
+    msg:"Internal Network Scan";
+    flags:S,12;
+    threshold: type threshold, track by_src, count 20, seconds 10;
+    classtype:network-scan;
+    sid:1000110;
+    rev:1;
+)
+
+alert tcp $HOME_NET any -> $HOME_NET $SSH_PORTS (
+    msg:"Internal SSH Lateral Movement";
+    flow:to_server,established;
+    threshold: type threshold, track by_src, count 5, seconds 60;
+    classtype:bad-unknown;
+    sid:1000111;
+    rev:1;
+)
+
+# ==================== MALWARE SIGNATURES ====================
+
+alert http any any -> any any (
+    msg:"Suspicious User-Agent";
+    flow:to_server,established;
+    content:"User-Agent|3a|";
+    http_header;
+    content:"bot|3b|crawler|3b|scanner";
+    nocase;
+    classtype:bad-unknown;
+    sid:1000120;
+    rev:1;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"Suspected Malware Communication";
+    flow:to_server,established;
+    threshold: type threshold, track by_src, count 100, seconds 5;
+    classtype:bad-unknown;
+    sid:1000121;
+    rev:1;
+)
