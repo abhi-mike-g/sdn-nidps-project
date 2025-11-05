@@ -1,0 +1,31 @@
+{
+  "threats": [
+    {
+      "timestamp": 1642255200,
+      "threat_type": "Port Scan",
+      "stride_category": "Information Disclosure",
+      "severity": "HIGH",
+      "source": "192.168.1.100",
+      "target": "10.0.0.1",
+      "action": "BLOCK"
+    },
+    {
+      "timestamp": 1642255205,
+      "threat_type": "SQL Injection",
+      "stride_category": "Elevation of Privilege",
+      "severity": "CRITICAL",
+      "source": "192.168.1.102",
+      "target": "10.0.0.10",
+      "action": "BLOCK"
+    },
+    {
+      "timestamp": 1642255210,
+      "threat_type": "SYN Flood",
+      "stride_category": "Denial of Service",
+      "severity": "CRITICAL",
+      "source": "192.168.1.103",
+      "target": "10.0.0.1",
+      "action": "BLOCK"
+    }
+  ]
+}
